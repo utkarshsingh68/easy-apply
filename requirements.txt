@@ -1,0 +1,37 @@
+# Core Framework
+fastapi>=0.115.0,<1.0.0
+uvicorn[standard]>=0.30.0,<1.0.0
+
+# Supabase
+supabase>=2.8.0,<3.0.0
+
+# LLM Providers
+openai>=1.55.0,<2.0.0
+groq>=0.11.0,<1.0.0
+
+# Web Scraping
+requests>=2.32.0,<3.0.0
+beautifulsoup4>=4.13.0,<5.0.0
+playwright>=1.50.0,<2.0.0
+
+# Environment Variables
+python-dotenv>=1.0.1,<2.0.0
+
+# Utilities
+tenacity>=9.0.0,<10.0.0
+
+# Logging
+loguru>=0.7.2,<1.0.0
+
+# Async HTTP
+httpx>=0.28.0,<1.0.0
+
+# Data Validation (used by FastAPI)
+pydantic>=2.10.0,<3.0.0
+pydantic-settings>=2.6.0,<3.0.0
+
+# Multipart form uploads
+python-multipart>=0.0.9,<1.0.0
+
+# Excel parsing
+openpyxl>=3.1.2,<4.0.0

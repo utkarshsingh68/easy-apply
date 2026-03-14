@@ -1,0 +1,31 @@
+# Environment secrets — NEVER commit
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+*.egg-info/
+dist/
+build/
+
+# Frontend build output (built inside Docker, not needed in repo)
+frontend/dist/
+frontend/node_modules/
+
+# Logs
+logs/
+*.log
+
+# Resume (personal file, do not commit)
+resume/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
