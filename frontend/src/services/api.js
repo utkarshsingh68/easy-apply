@@ -1,6 +1,8 @@
 import axios from 'axios'
 
-const BASE_URL = 'http://127.0.0.1:8000'
+// In dev: VITE_API_URL=http://127.0.0.1:8000 (set via frontend/.env.development)
+// In production (Docker/Railway): empty string → relative paths → same origin
+const BASE_URL = import.meta.env.VITE_API_URL || ''
 
 const client = axios.create({
   baseURL: BASE_URL,
