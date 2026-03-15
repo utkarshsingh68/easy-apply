@@ -64,6 +64,26 @@ _TEMPLATE_HINTS = {
 }
 
 
+def _fallback_email(company_name: str, job_title: str, recipient_email: str) -> EmailDraft:
+    """Build a deterministic non-LLM draft so app remains usable on provider outages/key errors."""
+    candidate = settings.candidate_name or "Candidate"
+    skills = [s.strip() for s in (settings.candidate_skills or "").split(",") if s.strip()]
+    top_skills = ", ".join(skills[:3]) if skills else "software engineering and problem solving"
+    recipient = recipient_email or "Hiring Team"
+    subject = f"Application for {job_title} at {company_name}"
+    body = (
+        f"Hi {recipient},\n\n"
+        f"I am reaching out to apply for the {job_title} role at {company_name}. "
+        f"I am excited by your team's work and believe my background aligns well with this position.\n\n"
+        f"I bring hands-on experience in {top_skills}, and I have built and shipped practical projects "
+        f"that required ownership from implementation to deployment.\n\n"
+        f"If helpful, I would value the opportunity to discuss how I can contribute to your team. "
+        f"Thank you for your time and consideration.\n\n"
+        f"Best regards,\n{candidate}"
+    )
+    return EmailDraft(subject=subject, body=body)
+
+
 def _build_prompt(
     company_name: str,
     job_title: str,
@@ -211,8 +231,8 @@ async def generate_email(
         else:
             raise RuntimeError(f"Unknown LLM_PROVIDER: {provider!r}")
     except Exception as exc:
-        logger.error(f"[AI] LLM call failed: {exc}")
-        raise RuntimeError(f"Email generation failed: {exc}") from exc
+        logger.error(f"[AI] LLM call failed, using fallback draft: {exc}")
+        return _fallback_email(company_name, job_title, recipient_email)
 
     draft = _parse_llm_response(raw, company_name, job_title)
     logger.info(f"[AI] Email draft ready — subject: {draft.subject!r}")
