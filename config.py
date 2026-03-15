@@ -29,12 +29,12 @@ class Settings(BaseSettings):
     groq_api_key: str = Field("", description="Groq API key")
 
     # ── Gmail SMTP ────────────────────────────────────────────────────────────
-    gmail_address: str = Field(..., description="Sender Gmail address")
-    gmail_app_password: str = Field(..., description="Gmail App Password (16 chars)")
+    gmail_address: str = Field("", description="Sender Gmail address")
+    gmail_app_password: str = Field("", description="Gmail App Password (16 chars)")
 
     # ── Candidate ─────────────────────────────────────────────────────────────
-    candidate_name: str = Field(..., description="Your full name")
-    candidate_skills: str = Field(..., description="Comma-separated skills")
+    candidate_name: str = Field("Candidate", description="Your full name")
+    candidate_skills: str = Field("", description="Comma-separated skills")
     candidate_resume_path: str = Field(
         "./resume/resume.pdf", description="Local path to resume PDF"
     )

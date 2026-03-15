@@ -56,6 +56,15 @@ def _smtp_send(
     Blocking function that opens an SMTP connection and sends one email.
     Called via asyncio.to_thread() to avoid blocking the event loop.
     """
+    if not settings.gmail_address or not settings.gmail_app_password:
+        return SendResult(
+            success=False,
+            message=(
+                "Email credentials are not configured. "
+                "Set GMAIL_ADDRESS and GMAIL_APP_PASSWORD in environment variables."
+            ),
+        )
+
     msg = MIMEMultipart()
     msg["From"] = settings.gmail_address
     msg["To"] = to_address
