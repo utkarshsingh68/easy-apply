@@ -59,7 +59,10 @@ export function CompaniesTable({ maxRows }) {
     setSendingId(company.id)
     try {
       const res = await api.sendEmail(company.id, getEmail(company))
-      showToast(`Sent · status: ${res.status}`)
+      if (res.status !== 'sent') {
+        throw new Error(res.message || `Email send failed with status: ${res.status}`)
+      }
+      showToast(res.message || 'Email sent successfully.')
       refreshData()
     } catch (err) {
       showToast(err.message, 'error')

@@ -6,7 +6,7 @@ All modules import from here — no direct os.getenv() calls elsewhere.
 """
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from pydantic import Field, field_validator
+from pydantic import AliasChoices, Field, field_validator
 
 
 class Settings(BaseSettings):
@@ -51,7 +51,11 @@ class Settings(BaseSettings):
     )
     send_admin_token: str = Field(
         "",
-        description="Owner token required in X-Admin-Token when public_send_enabled is false.",
+        validation_alias=AliasChoices("SEND_ADMIN_TOKEN", "OWNER_TOKEN"),
+        description=(
+            "Owner token required in X-Admin-Token when public_send_enabled is false. "
+            "Also supports legacy OWNER_TOKEN env var."
+        ),
     )
 
     @field_validator("llm_provider")

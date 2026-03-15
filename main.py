@@ -1001,12 +1001,16 @@ async def send_email_endpoint(
             email_body=log["email_body"],
             followup_days=[3, 7],
         )
+        return SendEmailResponse(
+            log_id=log["id"],
+            company_id=company_id,
+            status=new_status,
+            message=result.message,
+        )
 
-    return SendEmailResponse(
-        log_id=log["id"],
-        company_id=company_id,
-        status=new_status,
-        message=result.message,
+    raise HTTPException(
+        status_code=status.HTTP_502_BAD_GATEWAY,
+        detail=f"Email send failed: {result.message}",
     )
 
 
@@ -1359,3 +1363,44 @@ async def favicon() -> Response:
 
 app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
 app.mount("/assets", StaticFiles(directory=FRONTEND_ASSETS_DIR, check_dir=False), name="assets")
+
+
+@app.get("/{full_path:path}", include_in_schema=False)
+async def spa_fallback(full_path: str, request: Request) -> FileResponse:
+    """Serve SPA routes (e.g. /settings) when opened directly in the browser."""
+    # Let API/static/resource paths keep normal 404 behavior.
+    protected_prefixes = (
+        "openapi.json",
+        "docs",
+        "redoc",
+        "health",
+        "dashboard-data",
+        "companies",
+        "emails",
+        "add-job",
+        "generate-email",
+        "send-email",
+        "templates",
+        "import",
+        "contact-enrich",
+        "resume-profiles",
+        "upload-resume",
+        "followups",
+        "replies",
+        "analytics",
+        "static",
+        "assets",
+        "favicon.ico",
+    )
+    normalized = full_path.strip("/")
+    if normalized.startswith(protected_prefixes):
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
+
+    accept_header = request.headers.get("accept", "")
+    if "text/html" not in accept_header:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
+
+    react_index = FRONTEND_DIST_DIR / "index.html"
+    if react_index.exists():
+        return FileResponse(react_index)
+    return FileResponse(BASE_DIR / "templates" / "index.html")
