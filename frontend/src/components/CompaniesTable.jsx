@@ -58,6 +58,11 @@ export function CompaniesTable({ maxRows }) {
   async function handleSend(company) {
     setSendingId(company.id)
     try {
+      const status = getStatus(company.id)
+      // Auto-generate email first if no pending draft exists
+      if (status !== 'pending') {
+        await api.generateEmail(company.id, getEmail(company))
+      }
       const res = await api.sendEmail(company.id, getEmail(company))
       if (res.status !== 'sent') {
         throw new Error(res.message || `Email send failed with status: ${res.status}`)
