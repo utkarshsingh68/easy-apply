@@ -24,8 +24,12 @@ export function CompaniesTable({ maxRows }) {
     localEmails[c.id] !== undefined ? localEmails[c.id] : c.email || ''
 
   const getStatus = (companyId) => {
-    const log = emailLogs.find((l) => l.company_id === companyId)
-    return log?.status || 'none'
+    const logs = emailLogs.filter((l) => l.company_id === companyId)
+    if (!logs.length) return 'none'
+    // Prioritize: sent > pending > failed
+    if (logs.some((l) => l.status === 'sent')) return 'sent'
+    if (logs.some((l) => l.status === 'pending')) return 'pending'
+    return logs[0].status
   }
 
   async function handleSaveEmail(company) {
@@ -61,7 +65,11 @@ export function CompaniesTable({ maxRows }) {
       const status = getStatus(company.id)
       // Auto-generate email first if no pending draft exists
       if (status !== 'pending') {
-        await api.generateEmail(company.id, getEmail(company))
+        try {
+          await api.generateEmail(company.id, getEmail(company))
+        } catch {
+          // 409 means a log already exists (sent/pending) — continue to send
+        }
       }
       const res = await api.sendEmail(company.id, getEmail(company))
       if (res.status !== 'sent') {
