@@ -1176,16 +1176,22 @@ async def upload_resume(file: UploadFile = File(...)) -> dict[str, Any]:
     suffix = FilePath(file.filename).suffix.lower()
     if suffix != ".pdf":
         raise HTTPException(status_code=400, detail="Only PDF files are accepted.")
-    resume_dir = BASE_DIR / "resume"
-    resume_dir.mkdir(parents=True, exist_ok=True)
-    # Always save as resume.pdf (the default path used by the system)
-    dest = resume_dir / "resume.pdf"
+    configured = FilePath(settings.candidate_resume_path)
+    dest = configured if configured.is_absolute() else (BASE_DIR / configured)
+    dest.parent.mkdir(parents=True, exist_ok=True)
     contents = await file.read()
     if len(contents) > 20 * 1024 * 1024:  # 20 MB hard limit
         raise HTTPException(status_code=413, detail="File too large (max 20 MB).")
-    dest.write_bytes(contents)
+    try:
+        dest.write_bytes(contents)
+    except OSError as exc:
+        logger.error(f"[Upload] Could not save resume to {dest}: {exc}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Could not save resume on server: {exc}",
+        )
     logger.info(f"[Upload] Resume saved to {dest} ({len(contents)} bytes)")
-    return {"saved_as": "resume.pdf", "size_bytes": len(contents)}
+    return {"saved_as": dest.name, "size_bytes": len(contents)}
 
 
 @app.post("/followups/run-due", tags=["Campaign"], summary="Send due follow-up emails")
