@@ -90,17 +90,7 @@ export function Settings() {
     try {
       const formData = new FormData()
       formData.append('file', resumeFile)
-      const token = localStorage.getItem('ajob_owner_token') || ''
-      const headers = token ? { 'X-Admin-Token': token } : {}
-      const res = await fetch('http://127.0.0.1:8000/upload-resume', {
-        method: 'POST',
-        headers,
-        body: formData,
-      })
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({ detail: 'Upload failed' }))
-        throw new Error(err.detail || 'Upload failed')
-      }
+      await api.uploadResume(formData)
       setResumeUploaded(true)
       showToast(`Resume "${resumeFile.name}" uploaded successfully!`)
       setResumeFile(null)

@@ -51,6 +51,10 @@ export const api = {
 
   bulkUploadSend: (formData) => client.post('/bulk-upload-send', formData),
   importPreview: (formData) => client.post('/import/preview', formData),
+  uploadResume: (formData) =>
+    client.post('/upload-resume', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    }),
 
   runFollowups: () => client.post('/followups/run-due'),
   syncReply: (events) => client.post('/replies/sync', events),
